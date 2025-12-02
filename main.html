@@ -8,7 +8,7 @@
 <meta content="Martin Lindström" name="author">
 <meta content="Stefan Santesson" name="author">
 <meta content="
-       This specification defines an extension to OpenID Federation that enables Subordinate Statements to include a claim indicating where a subject’s Entity Configuration is located. The extension introduces the  ec_location  claim, which specifies an alternative location for retrieving the subject’s Entity Configuration. This functionality allows Entity Configuration data to be hosted at an Intermediate Entity, which can be essential for enabling legacy systems or non-federation capable entities to register and operate within a federation. 
+       This specification defines an extension to OpenID Federation that enables Subordinate Statements to include a Claim indicating where a subject’s Entity Configuration is located. The extension introduces the  ec_location  Claim, which specifies an alternative location for retrieving the subject’s Entity Configuration. This functionality allows Entity Configuration data to be hosted at an Intermediate Entity, which can be essential for enabling legacy systems or non-federation capable entities to register and operate within a federation. 
     " name="description">
 <meta content="xml2rfc 3.16.0" name="generator">
 <meta content="security" name="keyword">
@@ -1221,7 +1221,7 @@ li > p:last-of-type:only-child {
 <dd class="workgroup">OpenID Connect A/B</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-12-01" class="published">1 December 2025</time>
+<time datetime="2025-12-02" class="published">2 December 2025</time>
     </dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
@@ -1239,7 +1239,7 @@ li > p:last-of-type:only-child {
 <h1 id="title">OpenID Federation Entity Configuration Hosting 1.0 - draft 00</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This specification defines an extension to OpenID Federation that enables Subordinate Statements to include a claim indicating where a subject’s Entity Configuration is located. The extension introduces the <code>ec_location</code> claim, which specifies an alternative location for retrieving the subject’s Entity Configuration. This functionality allows Entity Configuration data to be hosted at an Intermediate Entity, which can be essential for enabling legacy systems or non-federation capable entities to register and operate within a federation.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This specification defines an extension to OpenID Federation that enables Subordinate Statements to include a Claim indicating where a subject’s Entity Configuration is located. The extension introduces the <code>ec_location</code> Claim, which specifies an alternative location for retrieving the subject’s Entity Configuration. This functionality allows Entity Configuration data to be hosted at an Intermediate Entity, which can be essential for enabling legacy systems or non-federation capable entities to register and operate within a federation.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <div id="toc">
 <section id="section-toc.1">
@@ -1253,10 +1253,13 @@ li > p:last-of-type:only-child {
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
                 <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-requirements-notation-and-c" class="internal xref">Requirements Notation and Conventions</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
-            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-the-ec_location-claim" class="internal xref">The ec_location Claim</a></p>
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-the-ec_location-claim" class="internal xref">The ec_location Claim</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-trust-chain-construction" class="internal xref">Trust Chain Construction</a></p>
@@ -1303,7 +1306,7 @@ li > p:last-of-type:only-child {
 <p id="section-1-2">One situation where a Federation Entity may not be able to make their Entity Configuration available at this URL is when their Entity Configuration is hosted by a Superior Entity and published under a URL based on a domain name that is owned by the Superior Entity. Reasons for this may be that an Entity registering to a federation is not fully OpenID Federation-compatible, or simply that it cannot expose its Entity Configuration at this URL.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">Another situation is when a Federation Entity, for legacy reasons, has an Entity Identifier that is not a URL. This is a case that is valid according for several Entity Types that may be supported by OpenID Federation.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">Not publishing the Entity Configuration at the configuration endpoint is a choice by the Federation Entity itself with the clear consequence that the Federation Entity will not be discoverable based on their Entity Identifier alone.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">This specification defines the <code>ec_location</code> claim to be used in Subordinate Statements, holding a location where the Entity Configuration of the subordinate can be obtained.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-5">This specification defines the <code>ec_location</code> Claim to be used in Subordinate Statements, holding a location where the Entity Configuration of the subordinate can be obtained.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <p id="section-1-6">This specification also describes an alternate method of constructing Trust Chains, where chains are constructed in a top-down fashion.<a href="#section-1-6" class="pilcrow">¶</a></p>
 <div id="requirements-notation-and-conventions">
 <section id="section-1.1">
@@ -1316,6 +1319,14 @@ this document are to be interpreted as described in BCP 14 <span>[<a href="#RFC2
           <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they appear in all capitals, as shown here.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="terminology">
+<section id="section-1.2">
+        <h3 id="name-terminology">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+        </h3>
+<p id="section-1.2-1">This specification uses the terms "Claim" and "JSON Web Token (JWT)" as defined by JSON Web Token (JWT) <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>, and "Entity", "Entity Identifier", "Trust Anchor", "Federation Entity", "Entity Statement", "Entity Configuration", "Subordinate Statement", "Intermediate Entity", "Leaf Entity", "Subordinate Entity", "Superior Entity", and "Trust Chain" defined in OpenID Federation 1.0 <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="the_ec_location_claim">
@@ -1323,13 +1334,13 @@ this document are to be interpreted as described in BCP 14 <span>[<a href="#RFC2
       <h2 id="name-the-ec_location-claim">
 <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-the-ec_location-claim" class="section-name selfRef">The ec_location Claim</a>
       </h2>
-<p id="section-2-1">This section defines the <code>ec_location</code> claim that MAY be included in a Subordinate Statement.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<p id="section-2-2">Using this claim, an alternative location for the subject’s Entity Configuration can be specified in a Subordinate Statement. Typically, this location differs from the configuration endpoint defined in Section 9 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
-<p id="section-2-3">The value of the <code>ec_location</code> claim is a single string that specifies the URL where the subject’s Entity Configuration is available. This URL MUST use either the https scheme or the data URL scheme <span>[<a href="#RFC2397" class="cite xref">RFC2397</a>]</span>, containing the complete Entity Configuration as a signed JWT.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-1">This section defines the <code>ec_location</code> Claim that MAY be included in a Subordinate Statement.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Using this Claim, an alternative location for the subject’s Entity Configuration can be specified in a Subordinate Statement. Typically, this location differs from the configuration endpoint defined in Section 9 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">The value of the <code>ec_location</code> Claim is a single string that specifies the URL where the subject’s Entity Configuration is available. This URL MUST use either the https scheme or the data URL scheme <span>[<a href="#RFC2397" class="cite xref">RFC2397</a>]</span>, containing the complete Entity Configuration as a signed JWT.<a href="#section-2-3" class="pilcrow">¶</a></p>
 <p id="section-2-4">A data URL MUST use the media type <code>application/entity-statement+jwt</code> and MUST NOT include a <code>;base64</code> declaration. The Entity Configuration data MUST be provided using compact serialization without additional Base64 encoding.<a href="#section-2-4" class="pilcrow">¶</a></p>
 <p id="section-2-5">Note: Base64 encoding is omitted because the Entity Configuration JWT already uses a URL-safe format.<a href="#section-2-5" class="pilcrow">¶</a></p>
-<p id="section-2-6">Section 9 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span> mandates that Intermediate Entities and Trust Anchors publish their Entity Configuration at the configuration endpoint. Therefore, it is RECOMMENDED to use the <code>ec_location</code> claim in Subordinate Statements only for Leaf Entities.<a href="#section-2-6" class="pilcrow">¶</a></p>
-<p id="section-2-7">When the <code>ec_location</code> claim is present in a Subordinate Statement, and the subject Entity does not publish its Entity Configuration at the configuration endpoint defined in Section 9 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>, this claim MUST be marked as critical, see Section 13.4 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>.<a href="#section-2-7" class="pilcrow">¶</a></p>
+<p id="section-2-6">Section 9 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span> mandates that Intermediate Entities and Trust Anchors publish their Entity Configuration at the configuration endpoint. Therefore, it is RECOMMENDED to use the <code>ec_location</code> Claim in Subordinate Statements only for Leaf Entities.<a href="#section-2-6" class="pilcrow">¶</a></p>
+<p id="section-2-7">When the <code>ec_location</code> Claim is present in a Subordinate Statement, and the subject Entity does not publish its Entity Configuration at the configuration endpoint defined in Section 9 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>, this Claim MUST be marked as critical, see Section 13.4 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>.<a href="#section-2-7" class="pilcrow">¶</a></p>
 <div class="lang-json= sourcecode" id="section-2-8">
 <pre>{
   "iss" : "https://superior-entity.example.com",
@@ -1341,7 +1352,7 @@ this document are to be interpreted as described in BCP 14 <span>[<a href="#RFC2
 }
 </pre><a href="#section-2-8" class="pilcrow">¶</a>
 </div>
-<p id="section-2-9"><strong>Example 1</strong>: Excerpt of the Subordinate Statement issued by <code>https://superior-entity.example.com</code> for the subject <code>example-legacy</code>, where the Intermediate Entity itself hosts the subject's Entity Configuration. This is indicated using the <code>ec_location</code> claim.<a href="#section-2-9" class="pilcrow">¶</a></p>
+<p id="section-2-9"><strong>Example 1</strong>: Excerpt of the Subordinate Statement issued by <code>https://superior-entity.example.com</code> for the subject <code>example-legacy</code>, where the Intermediate Entity itself hosts the subject's Entity Configuration. This is indicated using the <code>ec_location</code> Claim.<a href="#section-2-9" class="pilcrow">¶</a></p>
 <div class="lang-json= sourcecode" id="section-2-10">
 <pre>  "ec_location" : "data:application/entity-statement+jwt,eyJhb...Qssw5c"
 </pre><a href="#section-2-10" class="pilcrow">¶</a>
@@ -1354,9 +1365,9 @@ this document are to be interpreted as described in BCP 14 <span>[<a href="#RFC2
       <h2 id="name-trust-chain-construction">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-trust-chain-construction" class="section-name selfRef">Trust Chain Construction</a>
       </h2>
-<p id="section-3-1">Section 10.1 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span> describes the process of establishing a Trust Chain using a bottom-up approach, where the process starts with the Entity Configuration of the Entity whose metadata and Trust Chain are to be resolved, and then constructs a chain up to a trusted Trust Anchor. This process uses the <code>authority_hints</code> claims of each fetched Entity Statement to identify the next Superior Entity. The procedure is repeated until at least one trusted Trust Anchor is reached for which a complete chain of statements can be evaluated.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-1">Section 10.1 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span> describes the process of establishing a Trust Chain using a bottom-up approach, where the process starts with the Entity Configuration of the Entity whose metadata and Trust Chain are to be resolved, and then constructs a chain up to a trusted Trust Anchor. This process uses the <code>authority_hints</code> Claim of each fetched Entity Statement to identify the next Superior Entity. The procedure is repeated until at least one trusted Trust Anchor is reached for which a complete chain of statements can be evaluated.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <p id="section-3-2">Using the above process will not work unless a Leaf Entity publishes its Entity Configuration at the configuration endpoint as specified in Section 9 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>. Not all entities within a federation may be able to adhere to this requirement, and therefore, alternative chain construction mechanisms need to be defined.<a href="#section-3-2" class="pilcrow">¶</a></p>
-<p id="section-3-3">This specification (see <a href="#top_down_chain_building" class="auto internal xref">Section 3.1</a> below) defines a top-down chain building mechanism that does not presuppose that all Leaf Entities publish their own Entity Configuration. This mechanism also makes use of the <code>ec_location</code> claim as specified in <a href="#the_ec_location_claim" class="auto internal xref">Section 2</a>.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-3">This specification (see <a href="#top_down_chain_building" class="auto internal xref">Section 3.1</a> below) defines a top-down chain building mechanism that does not presuppose that all Leaf Entities publish their own Entity Configuration. This mechanism also makes use of the <code>ec_location</code> Claim as specified in <a href="#the_ec_location_claim" class="auto internal xref">Section 2</a>.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <div id="top_down_chain_building">
 <section id="section-3.1">
         <h3 id="name-top-down-chain-building">
@@ -1364,7 +1375,7 @@ this document are to be interpreted as described in BCP 14 <span>[<a href="#RFC2
         </h3>
 <p id="section-3.1-1">Top-down chain building starts with the Entity Configuration of a Trust Anchor and constructs a data map of all valid chain paths under this Trust Anchor. What is considered a valid chain is determined by the path builder based on any suitable criteria including, but not limited to, constraints, entity type, and similar factors.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2">The process used to build valid paths is to traverse all Intermediate Entities under the Trust Anchor and to list all Subordinate Entities using their subordinate listings endpoint (see Section 8.2 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>). This process is repeated until all relevant Leaf Entities have been mapped.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
-<p id="section-3.1-3">The most important difference between top-down and bottom-up chain construction, as defined in Section 10.1 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>, is the order in which Entity Statements are collected. In top-down construction, the Subordinate Statement of an Entity is fetched before the Entity Configuration for the same subject, and this fact, together with the use of the <code>ec_location</code> claim (<a href="#the_ec_location_claim" class="auto internal xref">Section 2</a>), enables the construction of a chain even when a subject Entity does not publish its Entity Configuration at the configuration endpoint.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.1-3">The most important difference between top-down and bottom-up chain construction, as defined in Section 10.1 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>, is the order in which Entity Statements are collected. In top-down construction, the Subordinate Statement of an Entity is fetched before the Entity Configuration for the same subject, and this fact, together with the use of the <code>ec_location</code> Claim (<a href="#the_ec_location_claim" class="auto internal xref">Section 2</a>), enables the construction of a chain even when a subject Entity does not publish its Entity Configuration at the configuration endpoint.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
 <p id="section-3.1-4">Federations that rely on the use of Resolvers (see Section 10.6 of <span>[<a href="#OpenID.Federation" class="cite xref">OpenID.Federation</a>]</span>) implementing top-down chain construction can use this capability to enable hosting of Entity Configuration documents at more convenient locations, while still ensuring the availability of validated peer entity data via resolve endpoints.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1419,6 +1430,10 @@ this document are to be interpreted as described in BCP 14 <span>[<a href="#RFC2
 <dt id="RFC2397">[RFC2397]</dt>
       <dd>
 <span class="refAuthor">Masinter, L.</span>, <span class="refTitle">"The "data" URL scheme"</span>, <span class="seriesInfo">RFC 2397</span>, <span class="seriesInfo">DOI 10.17487/RFC2397</span>, <time datetime="1998-08" class="refDate">August 1998</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2397">https://www.rfc-editor.org/info/rfc2397</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7519">[RFC7519]</dt>
+      <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">N. Sakimura</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>, <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI 10.17487/RFC7519</span>, <time datetime="2015-05" class="refDate">May 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
     <dd>
