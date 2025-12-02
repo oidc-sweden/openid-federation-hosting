@@ -63,7 +63,6 @@ jobs:
         if: success()
         uses: crazy-max/ghaction-github-pages@v2
         with:
-          domain: www.oidc.se
           target_branch: gh-pages
           build_dir: html
           keep_history: true
