@@ -30,7 +30,7 @@ organization="IDsec Solutions"
 
 .# Abstract
 
-This specification defines an extension to OpenID Federation that enables Subordinate Statements to include a claim indicating where a subject’s Entity Configuration is located. The extension introduces the `ec_location` claim, which specifies an alternative location for retrieving the subject’s Entity Configuration. This functionality allows Entity Configuration data to be hosted at an Intermediate Entity, which can be essential for enabling legacy systems or non-federation capable entities to register and operate within a federation.
+This specification defines an extension to OpenID Federation that enables Subordinate Statements to include a Claim indicating where a subject’s Entity Configuration is located. The extension introduces the `ec_location` Claim, which specifies an alternative location for retrieving the subject’s Entity Configuration. This functionality allows Entity Configuration data to be hosted at an Intermediate Entity, which can be essential for enabling legacy systems or non-federation capable entities to register and operate within a federation.
 
 {mainmatter}
 
@@ -44,7 +44,7 @@ Another situation is when a Federation Entity, for legacy reasons, has an Entity
 
 Not publishing the Entity Configuration at the configuration endpoint is a choice by the Federation Entity itself with the clear consequence that the Federation Entity will not be discoverable based on their Entity Identifier alone.
 
-This specification defines the `ec_location` claim to be used in Subordinate Statements, holding a location where the Entity Configuration of the subordinate can be obtained.
+This specification defines the `ec_location` Claim to be used in Subordinate Statements, holding a location where the Entity Configuration of the subordinate can be obtained.
 
 This specification also describes an alternate method of constructing Trust Chains, where chains are constructed in a top-down fashion.
 
@@ -55,22 +55,25 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 this document are to be interpreted as described in BCP 14 [@!RFC2119]
 [@!RFC8174] when, and only when, they appear in all capitals, as shown here.
 
+## Terminology
+
+This specification uses the terms "Claim" and "JSON Web Token (JWT)" as defined by JSON Web Token (JWT) [@!RFC7519], and "Entity", "Entity Identifier", "Trust Anchor", "Federation Entity", "Entity Statement", "Entity Configuration", "Subordinate Statement", "Intermediate Entity", "Leaf Entity", "Subordinate Entity", "Superior Entity", and "Trust Chain" defined in OpenID Federation 1.0 [@!OpenID.Federation].
 
 # The ec_location Claim {#the_ec_location_claim}
 
-This section defines the `ec_location` claim that MAY be included in a Subordinate Statement.
+This section defines the `ec_location` Claim that MAY be included in a Subordinate Statement.
 
-Using this claim, an alternative location for the subject’s Entity Configuration can be specified in a Subordinate Statement. Typically, this location differs from the configuration endpoint defined in Section 9 of [@!OpenID.Federation].
+Using this Claim, an alternative location for the subject’s Entity Configuration can be specified in a Subordinate Statement. Typically, this location differs from the configuration endpoint defined in Section 9 of [@!OpenID.Federation].
 
-The value of the `ec_location` claim is a single string that specifies the URL where the subject’s Entity Configuration is available. This URL MUST use either the https scheme or the data URL scheme [@!RFC2397], containing the complete Entity Configuration as a signed JWT.
+The value of the `ec_location` Claim is a single string that specifies the URL where the subject’s Entity Configuration is available. This URL MUST use either the https scheme or the data URL scheme [@!RFC2397], containing the complete Entity Configuration as a signed JWT.
 
 A data URL MUST use the media type `application/entity-statement+jwt` and MUST NOT include a `;base64` declaration. The Entity Configuration data MUST be provided using compact serialization without additional Base64 encoding.
 
 Note: Base64 encoding is omitted because the Entity Configuration JWT already uses a URL-safe format.
 
-Section 9 of [@!OpenID.Federation] mandates that Intermediate Entities and Trust Anchors publish their Entity Configuration at the configuration endpoint. Therefore, it is RECOMMENDED to use the `ec_location` claim in Subordinate Statements only for Leaf Entities.
+Section 9 of [@!OpenID.Federation] mandates that Intermediate Entities and Trust Anchors publish their Entity Configuration at the configuration endpoint. Therefore, it is RECOMMENDED to use the `ec_location` Claim in Subordinate Statements only for Leaf Entities.
 
-When the `ec_location` claim is present in a Subordinate Statement, and the subject Entity does not publish its Entity Configuration at the configuration endpoint defined in Section 9 of [@!OpenID.Federation], this claim MUST be marked as critical, see Section 13.4 of [@!OpenID.Federation].
+When the `ec_location` Claim is present in a Subordinate Statement, and the subject Entity does not publish its Entity Configuration at the configuration endpoint defined in Section 9 of [@!OpenID.Federation], this Claim MUST be marked as critical, see Section 13.4 of [@!OpenID.Federation].
 
 ```json=
 {
@@ -83,7 +86,7 @@ When the `ec_location` claim is present in a Subordinate Statement, and the subj
 }
 ```
 
-**Example 1**: Excerpt of the Subordinate Statement issued by `https://superior-entity.example.com` for the subject `example-legacy`, where the Intermediate Entity itself hosts the subject's Entity Configuration. This is indicated using the `ec_location` claim.
+**Example 1**: Excerpt of the Subordinate Statement issued by `https://superior-entity.example.com` for the subject `example-legacy`, where the Intermediate Entity itself hosts the subject's Entity Configuration. This is indicated using the `ec_location` Claim.
 
 ```json=
   "ec_location" : "data:application/entity-statement+jwt,eyJhb...Qssw5c"
@@ -93,11 +96,11 @@ When the `ec_location` claim is present in a Subordinate Statement, and the subj
 
 # Trust Chain Construction
 
-Section 10.1 of [@!OpenID.Federation] describes the process of establishing a Trust Chain using a bottom-up approach, where the process starts with the Entity Configuration of the Entity whose metadata and Trust Chain are to be resolved, and then constructs a chain up to a trusted Trust Anchor. This process uses the `authority_hints` claims of each fetched Entity Statement to identify the next Superior Entity. The procedure is repeated until at least one trusted Trust Anchor is reached for which a complete chain of statements can be evaluated.
+Section 10.1 of [@!OpenID.Federation] describes the process of establishing a Trust Chain using a bottom-up approach, where the process starts with the Entity Configuration of the Entity whose metadata and Trust Chain are to be resolved, and then constructs a chain up to a trusted Trust Anchor. This process uses the `authority_hints` Claim of each fetched Entity Statement to identify the next Superior Entity. The procedure is repeated until at least one trusted Trust Anchor is reached for which a complete chain of statements can be evaluated.
 
 Using the above process will not work unless a Leaf Entity publishes its Entity Configuration at the configuration endpoint as specified in Section 9 of [@!OpenID.Federation]. Not all entities within a federation may be able to adhere to this requirement, and therefore, alternative chain construction mechanisms need to be defined.
 
-This specification (see (#top_down_chain_building) below) defines a top-down chain building mechanism that does not presuppose that all Leaf Entities publish their own Entity Configuration. This mechanism also makes use of the `ec_location` claim as specified in (#the_ec_location_claim).
+This specification (see (#top_down_chain_building) below) defines a top-down chain building mechanism that does not presuppose that all Leaf Entities publish their own Entity Configuration. This mechanism also makes use of the `ec_location` Claim as specified in (#the_ec_location_claim).
 
 ## Top-down Chain Building {#top_down_chain_building}
 
@@ -105,7 +108,7 @@ Top-down chain building starts with the Entity Configuration of a Trust Anchor a
 
 The process used to build valid paths is to traverse all Intermediate Entities under the Trust Anchor and to list all Subordinate Entities using their subordinate listings endpoint (see Section 8.2 of [@!OpenID.Federation]). This process is repeated until all relevant Leaf Entities have been mapped.
 
-The most important difference between top-down and bottom-up chain construction, as defined in Section 10.1 of [@!OpenID.Federation], is the order in which Entity Statements are collected. In top-down construction, the Subordinate Statement of an Entity is fetched before the Entity Configuration for the same subject, and this fact, together with the use of the `ec_location` claim ((#the_ec_location_claim)), enables the construction of a chain even when a subject Entity does not publish its Entity Configuration at the configuration endpoint.
+The most important difference between top-down and bottom-up chain construction, as defined in Section 10.1 of [@!OpenID.Federation], is the order in which Entity Statements are collected. In top-down construction, the Subordinate Statement of an Entity is fetched before the Entity Configuration for the same subject, and this fact, together with the use of the `ec_location` Claim ((#the_ec_location_claim)), enables the construction of a chain even when a subject Entity does not publish its Entity Configuration at the configuration endpoint.
 
 Federations that rely on the use of Resolvers (see Section 10.6 of [@!OpenID.Federation]) implementing top-down chain construction can use this capability to enable hosting of Entity Configuration documents at more convenient locations, while still ensuring the availability of validated peer entity data via resolve endpoints.
 
