@@ -30,23 +30,21 @@ organization="IDsec Solutions"
 
 .# Abstract
 
-This specification defines an extension to OpenID Federation that enables Subordinate Statements to include a Claim indicating where a subject’s Entity Configuration is located. The extension introduces the `ec_location` Claim, which specifies an alternative location for retrieving the subject’s Entity Configuration. This functionality allows Entity Configuration data to be hosted at an Intermediate Entity, which can be essential for enabling legacy systems or non-federation capable entities to register and operate within a federation.
+This specification defines an extension to OpenID Federation that enables Subordinate Statements to include a Claim that indicates where a subject’s Entity Configuration is located. The extension introduces the `ec_location` Claim, which specifies an alternative location for retrieving the subject’s Entity Configuration. This functionality allows Entity Configuration data to be hosted at an Intermediate Entity or at another location, which can be essential for enabling legacy systems or entities that do not have full federation support to register and operate within a federation.
 
 {mainmatter}
 
 # Introduction
 
-OpenID Federation 1.0 [@!OpenID.Federation] defines a configuration endpoint where Federation Entities should publish their Entity Configuration. The URL for this endpoint is the Entity Identifier concatenated with `/.well-known/openid-federation`.
+OpenID Federation 1.0 [@!OpenID.Federation] defines a configuration endpoint where Federation Entities should publish their Entity Configuration. The URL for this endpoint is the Entity Identifier URL concatenated with `/.well-known/openid-federation`.
 
 One situation where a Federation Entity may not be able to make their Entity Configuration available at this URL is when their Entity Configuration is hosted by a Superior Entity and published under a URL based on a domain name that is owned by the Superior Entity. Reasons for this may be that an Entity registering to a federation is not fully OpenID Federation-compatible, or simply that it cannot expose its Entity Configuration at this URL.
 
-Another situation is when a Federation Entity, for legacy reasons, has an Entity Identifier that is not a URL. This is a case that is valid according for several Entity Types that may be supported by OpenID Federation.
+Another situation is when a Federation Entity, for legacy or other reasons, has an identifier that is not a URL. This is a case that is valid according for several Entity Types that may be supported by OpenID Federation.
 
 Not publishing the Entity Configuration at the configuration endpoint is a choice by the Federation Entity itself with the clear consequence that the Federation Entity will not be discoverable based on their Entity Identifier alone.
 
 This specification defines the `ec_location` Claim to be used in Subordinate Statements, holding a location where the Entity Configuration of the subordinate can be obtained.
-
-This specification also describes an alternate method of constructing Trust Chains, where chains are constructed in a top-down fashion.
 
 ## Requirements Notation and Conventions
 
@@ -59,7 +57,7 @@ this document are to be interpreted as described in BCP 14 [@!RFC2119]
 
 This specification uses the terms "Claim" and "JSON Web Token (JWT)" as defined by JSON Web Token (JWT) [@!RFC7519], and "Entity", "Entity Identifier", "Trust Anchor", "Federation Entity", "Entity Statement", "Entity Configuration", "Subordinate Statement", "Intermediate Entity", "Leaf Entity", "Subordinate Entity", "Superior Entity", and "Trust Chain" defined in OpenID Federation 1.0 [@!OpenID.Federation].
 
-# The ec_location Claim {#the_ec_location_claim}
+# The ec\_location Claim {#the_ec_location_claim}
 
 This section defines the `ec_location` Claim that MAY be included in a Subordinate Statement.
 
@@ -73,20 +71,19 @@ Note: Base64 encoding is omitted because the Entity Configuration JWT already us
 
 Section 9 of [@!OpenID.Federation] mandates that Intermediate Entities and Trust Anchors publish their Entity Configuration at the configuration endpoint. Therefore, it is RECOMMENDED to use the `ec_location` Claim in Subordinate Statements only for Leaf Entities.
 
-When the `ec_location` Claim is present in a Subordinate Statement, and the subject Entity does not publish its Entity Configuration at the configuration endpoint defined in Section 9 of [@!OpenID.Federation], this Claim MUST be marked as critical, see Section 13.4 of [@!OpenID.Federation].
+An Intermediate Entity creating a Subordinate Statement that includes the `ec_location` Claim SHOULD NOT mark this Claim as critical (see Section 13.4 of [@!OpenID.Federation]). The reason is that Trust Chain validation does not depend on support for `ec_location`. If a peer supplies the full chain, it can be validated even when the Claim is not understood.
 
 ```json=
 {
   "iss" : "https://superior-entity.example.com",
-  "sub" : "example-legacy",
+  "sub" : "urn:example:legacy:rp",
   ...  
-  "ec_location" : "https://superior-entity.example.com/hosted/ec/example-legacy",
+  "ec_location" : "https://superior-entity.example.com/hosted/ec/example-legacy-rp",
   ...
-  "crit" : [ "ec_location", ... ]
 }
 ```
 
-**Example 1**: Excerpt of the Subordinate Statement issued by `https://superior-entity.example.com` for the subject `example-legacy`, where the Intermediate Entity itself hosts the subject's Entity Configuration. This is indicated using the `ec_location` Claim.
+**Example 1**: Excerpt of the Subordinate Statement issued by `https://superior-entity.example.com` for the subject `urn:example:legacy:rp`, where the Intermediate Entity itself hosts the subject's Entity Configuration. This is indicated using the `ec_location` Claim.
 
 ```json=
   "ec_location" : "data:application/entity-statement+jwt,eyJhb...Qssw5c"
@@ -94,43 +91,70 @@ When the `ec_location` Claim is present in a Subordinate Statement, and the subj
 
 **Example 2**: Using a data URL as the value for `ec_location`.
 
-# Trust Chain Construction
+# Trust Chain Construction {#trust_chain_construction}
 
-Section 10.1 of [@!OpenID.Federation] describes the process of establishing a Trust Chain using a bottom-up approach, where the process starts with the Entity Configuration of the Entity whose metadata and Trust Chain are to be resolved, and then constructs a chain up to a trusted Trust Anchor. This process uses the `authority_hints` Claim of each fetched Entity Statement to identify the next Superior Entity. The procedure is repeated until at least one trusted Trust Anchor is reached for which a complete chain of statements can be evaluated.
+Section 10.1 of [@!OpenID.Federation] describes the process of establishing a Trust Chain using a bottom-up approach. In this approach, the process starts with the Entity Configuration of the Entity whose metadata and Trust Chain are to be resolved, and then constructs a chain up to a trusted Trust Anchor. This process uses the `authority_hints` Claim of each fetched Entity Statement to identify the next Superior Entity. The procedure is repeated until at least one trusted Trust Anchor is reached, for which a complete chain of statements can be evaluated.
 
-Using the above process will not work unless a Leaf Entity publishes its Entity Configuration at the configuration endpoint as specified in Section 9 of [@!OpenID.Federation]. Not all entities within a federation may be able to adhere to this requirement, and therefore, alternative chain construction mechanisms need to be defined.
+Using this process will not work unless a Leaf Entity publishes its Entity Configuration at the configuration endpoint, as specified in Section 9 of [@!OpenID.Federation]. Not all Entities within a federation may be able to adhere to this requirement. Therefore, alternative chain construction mechanisms need to be used.
 
-This specification (see (#top_down_chain_building) below) defines a top-down chain building mechanism that does not presuppose that all Leaf Entities publish their own Entity Configuration. This mechanism also makes use of the `ec_location` Claim as specified in (#the_ec_location_claim).
+Section 17.2.2 of [@!OpenID.Federation] defines a top-down discovery pattern, where a Trust Chain is built starting from a known Trust Anchor.
 
-## Top-down Chain Building {#top_down_chain_building}
+The most important difference between top-down and bottom-up chain construction, as defined in Section 10.1 of [@!OpenID.Federation], is the order in which Entity Statements are collected. In top-down construction, the Subordinate Statement of an Entity is fetched before the Entity Configuration for the same subject. This fact, together with the use of the `ec_location` Claim ((#the_ec_location_claim)), enables the construction of a chain even when a subject Entity does not publish its Entity Configuration at the configuration endpoint.
 
-Top-down chain building starts with the Entity Configuration of a Trust Anchor and constructs a data map of all valid chain paths under this Trust Anchor. What is considered a valid chain is determined by the path builder based on any suitable criteria including, but not limited to, constraints, entity type, and similar factors.
+The top-down chain construction algorithm SHOULD be used in federations where Entity Configurations may be hosted at locations other than an Entity’s configuration endpoint.
 
-The process used to build valid paths is to traverse all Intermediate Entities under the Trust Anchor and to list all Subordinate Entities using their subordinate listings endpoint (see Section 8.2 of [@!OpenID.Federation]). This process is repeated until all relevant Leaf Entities have been mapped.
-
-The most important difference between top-down and bottom-up chain construction, as defined in Section 10.1 of [@!OpenID.Federation], is the order in which Entity Statements are collected. In top-down construction, the Subordinate Statement of an Entity is fetched before the Entity Configuration for the same subject, and this fact, together with the use of the `ec_location` Claim ((#the_ec_location_claim)), enables the construction of a chain even when a subject Entity does not publish its Entity Configuration at the configuration endpoint.
-
-Federations that rely on the use of Resolvers (see Section 10.6 of [@!OpenID.Federation]) implementing top-down chain construction can use this capability to enable hosting of Entity Configuration documents at more convenient locations, while still ensuring the availability of validated peer entity data via resolve endpoints.
-
-
-# Implementation Considerations
-
-TODO
+Federations that rely on the use of Resolvers (see Section 10.6 of [@!OpenID.Federation]) implementing top-down chain construction can use this capability to enable hosting of Entity Configuration documents at more convenient locations, while still ensuring the availability of validated peer Entity data via resolve endpoints.
 
 # Security Considerations
 
-TODO
+## Ensuring Entity Identifier Uniqueness
 
-# Privacy Considerations
+An Entity that exposes its Entity Configuration at the configuration endpoint, as specified in Section 9 of [@!OpenID.Federation], will implicitly prove its ownership of the domain on which this document is published. This ensures that the same Entity Identifier cannot be used by separate Entities within the federation.
 
-TODO
+However, if an Entity cannot publish its Entity Configuration at this location and instead relies on its Superior Entity to include the `ec_location` Claim in the Subordinate Statement for the Entity, there is no implicit proof of ownership of the domain. If this is not combined with naming restrictions, this may lead to a federation where several separate Entities have the same Entity Identifier, which in turn may lead to risks concerning Entity impersonation.
 
+Suppose the following federation setup:
+
+- Under the Intermediate Entity IE-1, there is an Entity named `https://op.example.com`. This Entity publishes its Entity Configuration at its configuration endpoint.
+
+- Intermediate Entity IE-2, which supports hosting of Entity Configurations on behalf of Subordinate Entities, provides a Subordinate Statement for an Entity that is also named `https://op.example.com`. This Subordinate Statement includes the `ec_location` Claim pointing to the hosted Entity Configuration location. 
+
+~~~ ascii-art
+                      +-------------+
+                      |     TA      |
+                      +-------------+
+                          |     |
+                __________|     |__________
+               |                           |
+        +------v------+             +------v------+
+        |    IE-1     |             |     IE-2    |
+        +-------------+             +--------+----+   +........................+
+               |                             |________| https://op.example.com |
+   +-----------v------------+                         +........................+
+   | https://op.example.com |                                   Hosted
+   +------------------------+
+~~~
+
+**Figure 1**: Illustration of how an Entity may impersonate another legitimate Entity if no security restrictions are applied within the federation.
+
+This is an example of how the integrity of the federation may be violated if no restrictions regarding Entity Identifier assignments exist. In the example above, the Subordinate Entity under the Intermediate Entity IE-2 manages to get IE-2 to issue a Subordinate Statement for an Entity with an Entity Identifier that is already held by a legitimate Entity.
+
+A federation that supports the use of the `ec_location` Claim MUST therefore define rules for Intermediate Entities issuing Subordinate Statements containing the `ec_location` Claim. Before an Intermediate Entity creates a Subordinate Statement for an Entity that does not publish its Entity Configuration at the configuration endpoint, the following restrictions MUST be fulfilled:
+
+- If the Entity Identifier for the Subordinate Entity is a URL, the Intermediate Entity MUST ensure that the actor requesting a Subordinate Statement owns, or has rights to use, the domain given by the Entity Identifier URL.
+
+- Regardless of whether the Entity Identifier for the Subordinate Entity is a URL or not, the Intermediate Entity MUST ensure that this identifier is not already assigned to another Entity within the federation.
+
+How the above requirements are implemented is out of scope for this specification.
+
+Furthermore, a Trust Anchor or Intermediate Entity MAY define Naming Constraints, as specified in Section 6.2.2 of [@!OpenID.Federation], to further ensure Entity Identifier integrity.
 
 # Acknowledgments
 
 We would like to thank the following individuals for their comments, ideas, and contributions to this implementation profile and to the initial set of implementations.
 
-TODO
+- Leif Johansson, Siros
+- Felix Hellman, Helagon
 
 {backmatter}
 
